@@ -37,6 +37,7 @@ This will only install the package within the project folder, so to use the pack
 To install the package globally, start julia and enter the package manager by pressing `]`. To install, enter the following command:
 ```julia
 pkg > add https://github.com/Brody-Lab/MixtureAgentsModels/
+```
 or, without using the package manager:
 ```julia
 julia > using Pkg
