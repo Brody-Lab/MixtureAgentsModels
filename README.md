@@ -1,5 +1,5 @@
 # MixtureAgentsModels
-Fit a Mixture-of-Agents Hidden Markov Model described in the preprint <a href=https://www.biorxiv.org/content/10.1101/2024.02.28.582617v1>Dynamic reinforcement learning reveals time-dependent shifts in strategy during reward learning.</a>
+Fit a Mixture-of-Agents Hidden Markov Model (MoA-HMM) described in the preprint <a href=https://www.biorxiv.org/content/10.1101/2024.02.28.582617v1>Dynamic reinforcement learning reveals time-dependent shifts in strategy during reward learning.</a>
 
 Documentation is a work in progress
 
