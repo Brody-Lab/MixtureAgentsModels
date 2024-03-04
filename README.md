@@ -55,9 +55,9 @@ See the `example_fit_HMM.jl` script in the <a href=https://github.com/Brody-Lab/
 ### Adding a task or agent
 Documentation for adding your own task or agent/agents is a work in progress. You may want to fork the repository first if you want to easily commit changes.
 
-To add your own agent, see the documentation of `EXAMPLE_agent.jl` in the <a href=https://github.com/Brody-Lab/MixtureAgentsModels/tree/main/src/agents>agents</a> directory for requisite struct fields and functions. Save your new agent in the same `agents` directory.
+To add your own agent, see the documentation of `EXAMPLE_agent.jl` in the <a href=https://github.com/Brody-Lab/MixtureAgentsModels/tree/main/src/agents>agents</a> directory for requisite struct fields and functions. Save your new agent as its own julia script in the same `agents` directory.
 
-To add your own task, see the documentation of `EXAMPLE_task.jl` in the <a href=https://github.com/Brody-Lab/MixtureAgentsModels/tree/main/src/tasks>tasks</a> directory for requisite struct fields and loading examples. Save your new task in the same `tasks` directory.
+To add your own task, see the documentation of `EXAMPLE_task.jl` in the <a href=https://github.com/Brody-Lab/MixtureAgentsModels/tree/main/src/tasks>tasks</a> directory for requisite struct fields and loading examples. Save your new task as its own julia script in the same `tasks` directory.
 
 Any agent or task needs to be exported and its file added to the module definition script `MixtureAgentsModels.jl`. To export a new agent or task, add a line near the existing agents and/or tasks.
 ```julia
