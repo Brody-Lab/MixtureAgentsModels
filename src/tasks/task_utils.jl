@@ -1,7 +1,8 @@
 function ratdata_tasks(task::Union{AbstractString,Nothing}=nothing)
     tasks = Dict(
         "TwoStepData"=>TwoStepData,"twostepdata"=>TwoStepData,
-        "pclicksdata"=>pclicksdata)
+        "PClicksData"=>PClicksData,
+        "GenericData"=>GenericData)
     if !isnothing(task)
         return tasks[task]
     else
