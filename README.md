@@ -6,7 +6,7 @@ Documentation is a work in progress
 For questions, email sjvenditto@gmail.com
 
 ## Installation
-### Option 1: Clone and setup project folder
+### Option 1: Clone and setup project folder (i.e. julia environment)
 From the terminal/command line, clone the repository in the current directory with:
 ```
 git clone https://github.com/Brody-Lab/MixtureAgentsModels/
