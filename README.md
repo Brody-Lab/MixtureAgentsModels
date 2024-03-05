@@ -11,7 +11,7 @@ From the terminal/command line, clone the repository in the current directory wi
 ```
 git clone https://github.com/Brody-Lab/MixtureAgentsModels/
 ```
-Or <a href=https://github.com/Brody-Lab/MixtureAgentsModels/archive/refs/heads/main.zip>download ZIP</a> and unzip in desired directory.
+Or <a href=https://github.com/Brody-Lab/MixtureAgentsModels/archive/refs/heads/main.zip>download ZIP</a> and extract in desired directory.
 
 After cloning, also from the terminal/command line, `cd` into the `MixtureAgentsModels` directory and start julia by specifying the current folder as the project location:
 ```
