@@ -1,5 +1,5 @@
 """
-    pclicksdata{S<:String,I<:Int,VS<:AbstractVector{String},VI<:AbstractVector{Int},VB<:AbstractVector{Bool},VF<:AbstractVector{Float64},VA<:AbstractVector} <: RatData EXAMPLEdata{T1,T2,T3,T4} <: RatData
+    PClicksData{S<:String,I<:Int,VS<:AbstractVector{String},VI<:AbstractVector{Int},VB<:AbstractVector{Bool},VF<:AbstractVector{Float64},VA<:AbstractVector} <: RatData EXAMPLEdata{T1,T2,T3,T4} <: RatData
 
 Data struct for Poisson Clicks task in rats. Also includes fields for 2-armed bandit/reward reversal task that can be switched to during training.
 
@@ -24,7 +24,7 @@ Data struct for Poisson Clicks task in rats. Also includes fields for 2-armed ba
 - `sess_inds_free`: vector of vectors of free trial indices for each session
 
 """
-@with_kw struct pclicksdata{S<:String,I<:Int,VS<:AbstractVector{String},VI<:AbstractVector{Int},VB<:AbstractVector{Bool},VF<:AbstractVector{Float64},VA<:AbstractVector} <: RatData 
+@with_kw struct PClicksData{S<:String,I<:Int,VS<:AbstractVector{String},VI<:AbstractVector{Int},VB<:AbstractVector{Bool},VF<:AbstractVector{Float64},VA<:AbstractVector} <: RatData 
     ratname::S
     task::VS
     ntrials::I
@@ -45,16 +45,16 @@ Data struct for Poisson Clicks task in rats. Also includes fields for 2-armed ba
 end
 
 """
-    pclicksdata(data::D) where D <: Union{Dict,JSON3.Object}
+    PClicksData(data::D) where D <: Union{Dict,JSON3.Object}
 
-Converts a dictionary or JSON object to a pclicksdata struct.
+Converts a dictionary or JSON object to a PClicksData struct.
 """
-function pclicksdata(data::D) where D <: Union{Dict,JSON3.Object}
+function PClicksData(data::D) where D <: Union{Dict,JSON3.Object}
     # remove "type" field if it exists; created when using `ratdata2dict`
     if "type" in keys(data)
         delete!(data,"type")
     end
-    return pclicksdata(; data...)
+    return PClicksData(; data...)
 end
 
 # """
@@ -162,5 +162,5 @@ function load_pclicks_csv(file::String,rat::String;sessions::Any=nothing)
     D[:ratname] = String(df.ratname[1])
     D[:ntrials] = length(D[:new_sess])
 
-    return pclicksdata(D)
+    return PClicksData(D)
 end

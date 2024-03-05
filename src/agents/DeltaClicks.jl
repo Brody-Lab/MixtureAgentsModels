@@ -19,12 +19,12 @@ Fields:
 end
 
 """
-    init_Q(θ::DeltaClicks; data::D=nothing, t::Int=1) where D <: Union{pclicksdata,Nothing}
+    init_Q(θ::DeltaClicks; data::D=nothing, t::Int=1) where D <: Union{PClicksData,Nothing}
 
 Special initialization function for DeltaClicks agent using the clicks on the first trial, since Q values are updated after the first trial.
 Uses default initialization if no data is provided.
 """
-function init_Q(θ::DeltaClicks; data::D=nothing, t::Int=1) where D <: Union{pclicksdata,Nothing}
+function init_Q(θ::DeltaClicks; data::D=nothing, t::Int=1) where D <: Union{PClicksData,Nothing}
     if !isnothing(data)
         @unpack nleftclicks,nrightclicks = data
         return @SVector [nrightclicks[t],nleftclicks[t],0,0]

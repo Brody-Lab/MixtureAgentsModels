@@ -25,10 +25,10 @@ export Q_values, init_Q, next_Q, next_Q!
 export agent_strings, βtitle, αtitle, atick, agent_color, agent_color_lite
 
 ##-- tasks --##
-export RatData, TwoStepData, pclicksdata, EXAMPLEdata
-export SimOptions, TwoStepSim
+export RatData, TwoStepData, PClicksData, GenericData
+export SimOptions, TwoStepSim, GenericSim
 # task functions
-export load_twostep, load_pclicks, load_EXAMPLE
+export load_twostep, load_pclicks, load_generic
 export simulate, split_data, ratdata_tasks
 
 ##-- models --##
@@ -68,7 +68,7 @@ abstract type SimOptions end
 include("agent_options.jl")
 include("model_options.jl")
 
-include("tasks/EXAMPLE_task.jl")
+include("tasks/generic_task.jl")
 include("tasks/twostep_task.jl")
 include("tasks/task_utils.jl")
 include("tasks/pclicks_task.jl")

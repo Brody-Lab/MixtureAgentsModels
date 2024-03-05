@@ -53,17 +53,20 @@ pkg > update
 See the `example_fit_HMM.jl` script in the <a href=https://github.com/Brody-Lab/MixtureAgentsModels/tree/main/examples>examples</a> directory for example model MoA-HMM fits to the two-step task and command descriptions. 
 > NOTE: `example_fit_drift.jl` uses an experimental model that combines a MoA with psytrack (https://github.com/nicholas-roy/psytrack) and should not be used in a serious capacity.
 
-### Adding a task or agent
+### Loading your own task via `GenericData`
+The task data struct `GenericData` contained in `generic_task.jl` in the <a href=https://github.com/Brody-Lab/MixtureAgentsModels/tree/main/src/tasks>tasks</a> directory contains the minimum features necessary to work with model-free agents. The example script `example_load_data.jl` points to two example files (a `.csv` and `.mat`) that can be used as skeletons for loading in your own data, as well as listing compatible agents with the GenericData struct. Additional fields can be added for compatibility with other agents. You may want to fork the repository first if you want to easily commit changes.
+
+### Adding a new agent
 Documentation for adding your own task or agent/agents is a work in progress. You may want to fork the repository first if you want to easily commit changes.
 
 To add your own agent, see the documentation of `EXAMPLE_agent.jl` in the <a href=https://github.com/Brody-Lab/MixtureAgentsModels/tree/main/src/agents>agents</a> directory for requisite struct fields and functions. Save your new agent as its own julia script in the same `agents` directory.
 
-To add your own task, see the documentation of `EXAMPLE_task.jl` in the <a href=https://github.com/Brody-Lab/MixtureAgentsModels/tree/main/src/tasks>tasks</a> directory for requisite struct fields and loading examples. Save your new task as its own julia script in the same `tasks` directory.
+To add your own task, see the documentation of `generic_task.jl` in the <a href=https://github.com/Brody-Lab/MixtureAgentsModels/tree/main/src/tasks>tasks</a> directory for requisite struct fields and loading examples. Save your new task as its own julia script in the same `tasks` directory.
 
 Any agent or task needs to be exported and its file added to the module definition script `MixtureAgentsModels.jl`. To export a new agent or task, add a line near the existing agents and/or tasks.
 ```julia
 export EXAMPLEAgent # for your agent struct
-export EXAMPLETask # for your task struct
+export EXAMPLEData # for your task struct
 ```
 
 If you have a custom loading function for your task struct, similarly export that function:
