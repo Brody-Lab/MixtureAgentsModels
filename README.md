@@ -6,12 +6,12 @@ Documentation is a work in progress
 For questions, email sjvenditto@gmail.com
 
 ## Installation
-### Option 1: Clone and setup project folder
+### Option 1: Clone and setup project folder (i.e. julia environment)
 From the terminal/command line, clone the repository in the current directory with:
 ```
 git clone https://github.com/Brody-Lab/MixtureAgentsModels/
 ```
-Or <a href=https://github.com/Brody-Lab/neuroGLM/archive/refs/heads/master.zip> download ZIP </a> and unzip in desired directory.
+Or <a href=https://github.com/Brody-Lab/MixtureAgentsModels/archive/refs/heads/main.zip>download ZIP</a> and extract in desired directory.
 
 After cloning, also from the terminal/command line, `cd` into the `MixtureAgentsModels` directory and start julia by specifying the current folder as the project location:
 ```
@@ -56,7 +56,7 @@ See the `example_fit_HMM.jl` script in the <a href=https://github.com/Brody-Lab/
 ### Loading your own task via `GenericData`
 The task data struct `GenericData` contained in `generic_task.jl` in the <a href=https://github.com/Brody-Lab/MixtureAgentsModels/tree/main/src/tasks>tasks</a> directory contains the minimum features necessary to work with model-free agents. The example script `example_load_data.jl` points to two example files (a `.csv` and `.mat`) that can be used as skeletons for loading in your own data, as well as listing compatible agents with the GenericData struct. Additional fields can be added for compatibility with other agents. You may want to fork the repository first if you want to easily commit changes.
 
-### Adding a new agent
+### Adding a new agent or task
 Documentation for adding your own task or agent/agents is a work in progress. You may want to fork the repository first if you want to easily commit changes.
 
 To add your own agent, see the documentation of `EXAMPLE_agent.jl` in the <a href=https://github.com/Brody-Lab/MixtureAgentsModels/tree/main/src/agents>agents</a> directory for requisite struct fields and functions. Save your new agent as its own julia script in the same `agents` directory.
