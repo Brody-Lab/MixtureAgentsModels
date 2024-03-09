@@ -59,8 +59,8 @@ function options2dict(options::AgentOptions)
 end
 
 function agents2dict(agents::AbstractArray{A},options::AgentOptions) where A <: Agent
-    @unpack fit_symbs,fit_priors,scale_x = options
-    agents_dict = Dict("agents"=>agents2string(agents),"params"=>get_params(agents,options),"fit_params"=>get_fit_params(options),"fit_symbs"=>string.(fit_symbs),"beta_priors"=>prior2dict.(get_param(agents,:βprior)),"scale_x"=>scale_x)
+    @unpack fit_symbs,fit_priors = options
+    agents_dict = Dict("agents"=>agents2string(agents),"params"=>get_params(agents,options),"fit_params"=>get_fit_params(options),"fit_symbs"=>string.(fit_symbs),"beta_priors"=>prior2dict.(get_param(agents,:βprior)))
     if !isnothing(fit_priors)
         agents_dict["fit_priors"] = string.(fit_priors)
         agents_dict["param_priors"] = prior2dict(get_priors(agents,options))
@@ -176,7 +176,7 @@ function dict2options(ops_dict)
         if !(typeof(sigmaSess0) <: Array)
             sigmaSess0 = Array(sigmaSess0)
         end
-        return ModelOptionsDrift(σ0=sigma0,σInit0=sigmaInit0,σSess0=sigmaSess0,nstarts=nstarts,maxiter=maxiter,tol=tol,scale_x=scale_x)
+        return ModelOptionsDrift(σ0=sigma0,σInit0=sigmaInit0,σSess0=sigmaSess0,nstarts=nstarts,maxiter=maxiter,tol=tol)
     else
         error("unrecognized options dictionary")
     end
@@ -184,11 +184,6 @@ end
 
 function dict2agents(agents_dict)
     agents = string2agents(agents_dict["agents"])
-    if haskey(agents_dict,"scale_x")
-        scale_x = agents_dict["scale_x"]
-    else
-        scale_x = false
-    end
     if haskey(agents_dict,"fit_priors")
         options = AgentOptions(agents,Symbol.(agents_dict["fit_symbs"]),agents_dict["fit_params"],fit_priors=true)
         param_priors = dict2prior(agents_dict["param_priors"])
