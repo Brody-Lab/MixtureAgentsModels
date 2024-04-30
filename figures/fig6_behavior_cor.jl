@@ -183,8 +183,8 @@ function get_behavior_df(rats)
             outcome_dur = vcat(outcome_dur,o_dur)
     
 
-            sf = data.trial_start[inds_c .+ 1]
-            ef = data.trial_end[inds_c]
+            sf = data.step1_times[inds_c .+ 1]
+            ef = data.outcome_times[inds_c]
             rf = copy(rews)
             ITI_d = ((sf .- ef) .^ (-1))[free]
             # ITI_d = log10.(sf .- ef)[free]
@@ -462,6 +462,7 @@ function plot_state_coefs(df_devs)
 
     df_avg = combine(groupby(df,[:r,:z]),:coef=>median,:coef=>bootci)
     p = @df groupby(df,:r)[1] violin(:z,:coef,group=:z,framestyle=:box,side=:left,msw=0,c=:gray,alpha=0.5,label="")
+    print(groupby(df,:r)[1])
     @df groupby(df,:r)[2] violin!(:z,:coef,group=:z,framestyle=:box,side=:right,msw=0,c=:gold3,alpha=0.5,label="")
     @df groupby(df,:r)[1] dotplot!(:z,:coef,group=:z,framestyle=:box,side=:left,msw=0,c=:gray,label="")
     @df groupby(df,:r)[2] dotplot!(:z,:coef,group=:z,framestyle=:box,side=:right,msw=0,c=:gold3,label="")
@@ -556,13 +557,13 @@ function plot_behavior_regs(df_trial,lmm,ex_sess=108,type="time",cs=[1 2])
             p1 = plot()
             plot_state_rectangles!(p1,df_ex.z_ind,onehot(df_ex.z_ind),df_ex[!,time_type],maximum(dur))
 
-            scatter!(df_ex[!,time_type][i1],dur[i1],c=:gray,msw=0)#,yflip=true)
+            scatter!(df_ex[!,time_type][i1],dur[i1],c=:gold3,msw=0)#,yflip=true)
             # yticks!(0:1:3,[L"$10^0$",L"$10^1$",L"$10^2$",L"$10^3$"])
-            scatter!(df_ex[!,time_type][i2],dur[i2],c=:gold3,msw=0)
+            scatter!(df_ex[!,time_type][i2],dur[i2],c=:gray,msw=0)
             # plot!(df_ex[!,time_type][i1],predict(lmm)[i1],lw=4,c=:black,s=:dash,label="full")
             # plot!(df_ex[!,time_type][i2],predict(lmm)[i2],lw=4,c=:gold4,label="full")
-            plot!(df_ex[!,time_type][i1],df_ex[!,vpred][i1],lw=4,c=:black,s=:dash,label="full")
-            plot!(df_ex[!,time_type][i2],df_ex[!,vpred][i2],lw=4,c=:gold4,label="full")
+            plot!(df_ex[!,time_type][i1],df_ex[!,vpred][i1],lw=4,c=:gold4,s=:dash,label="full")
+            plot!(df_ex[!,time_type][i2],df_ex[!,vpred][i2],lw=4,c=:black,label="full")
 
             plot!(xformatter=_->"")
             plot!(legend=false)
