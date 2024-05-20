@@ -4,28 +4,9 @@
 Dictionary matching all agent structs to a string key of its name. Agents with special characters in their name (e.g. `ΔClicks`) are additionally paried with a keystring with the special character replaced (e.g. `DeltaClicks`). Agents must be included in this dictionary to make use of built-in saving and loading functions.
 """
 function agent_strings(agent::Union{AbstractString,Nothing}=nothing)
-    agents = Dict(
-        "Bias"=>Bias,
-        "Intercept"=>Intercept,
-        "MBbellman"=>MBbellman,
-        "MBbellmanB"=>MBbellmanB,
-        "MBchoice"=>MBchoice,
-        "MBchoiceB"=>MBchoiceB,
-        "MBreward"=>MBreward,
-        "MBrewardB"=>MBrewardB,
-        "MFchoice"=>MFchoice,
-        "MFchoiceB"=>MFchoiceB,
-        "MFreward"=>MFreward,
-        "MFrewardB"=>MFrewardB,
-        "NoveltyPref"=>NoveltyPref,"NP"=>NoveltyPref,
-        "Persev"=>Persev,
-        "TD0"=>TD0,
-        "TD1"=>TD1,
-        "TD1B"=>TD1B,
-        "CR"=>CR,"CO"=>CO,"UR"=>UR,"UO"=>UO,
-        "DeltaClicks"=>DeltaClicks,
-        "DeltaClicksZ"=>DeltaClicksZ,
-        "Gambler"=>Gambler)
+    agent_types = subtypes(Agent)
+    agent_strings = string.(agent_types)
+    agents = Dict([s=>t for (s,t) in zip(agent_strings,agent_types)]...,"CR"=>CR,"CO"=>CO,"UR"=>UR,"UO"=>UO)
     if !isnothing(agent)
         return agents[agent]
     else

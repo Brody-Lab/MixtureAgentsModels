@@ -26,6 +26,7 @@ Data struct for Poisson Clicks task in rats. Also includes fields for 2-armed ba
 """
 @with_kw struct PClicksData{S<:String,I<:Int,VS<:AbstractVector{String},VI<:AbstractVector{Int},VB<:AbstractVector{Bool},VF<:AbstractVector{Float64},VA<:AbstractVector} <: RatData 
     ratname::S
+    sessiondate::VS
     task::VS
     ntrials::I
     nfree::I = ntrials
@@ -100,10 +101,19 @@ https://github.com/Brody-Lab/UberPhys/blob/main/thomas/analyses/analysis_2023_12
 If you want to load data from a different file type, you can add a new function.
 """
 function load_pclicks(file::String,rat::String;sessions::Any=nothing)
-    ext = split(file,'.')[end] # get file extension
+    parts = split(file,'.')
+    if length(parts) > 1
+        ext = parts[end] # get file extension
+        folder = false
+    else
+        folder = true
+        ext = split(readdir(file)[1],'.')[end]
+    end
 
     if ext == "csv"
         return load_pclicks_csv(file,rat;sessions=sessions)
+    elseif ext == "npz"
+        return load_pclicks_npz(file,rat;sessions=sessions,folder=folder)
     else
         error("File type not supported")
     end
@@ -162,5 +172,45 @@ function load_pclicks_csv(file::String,rat::String;sessions::Any=nothing)
     D[:ratname] = String(df.ratname[1])
     D[:ntrials] = length(D[:new_sess])
 
+    return PClicksData(D)
+end
+
+function load_pclicks_npz(file::String,rat::String;sessions::Any=nothing,folder=false)
+    if folder
+        files = file.*filter(x->contains(x,rat), readdir(file))
+        sessiondates = match.(r"(\d{4}[_||-]\d{2}[_||-]\d{2})",files,length(file))
+        sessiondates = [s[1] for s in sessiondates]
+    else
+        files = [file]
+        sessiondates = [""]
+    end
+    task = ["delta clicks" for f in files]
+    choices = Array{Array{Int,1},1}(undef,length(files))
+    nleftclicks = Array{Array{Int,1},1}(undef,length(files))
+    nrightclicks = Array{Array{Int,1},1}(undef,length(files))
+    rewards = Array{Array{Int,1},1}(undef,length(files))
+    new_sess = Array{Array{Bool,1},1}(undef,length(files))
+    for (f,file) in enumerate(files) 
+        dat = npzread(file)
+        choices[f] = dat["choices"]
+        clicks = dropdims(sum(dat["clicks"];dims=2),dims=2)
+        nleftclicks[f] = clicks[:,1]
+        nrightclicks[f] = clicks[:,2]
+        rewards[f] = dropdims(diff(clicks,dims=2) .> 0,dims=2) .== dat["choices"]
+        new_sess[f] = vcat(true,falses(length(rewards[f])-1))
+    end
+    D = Dict{Symbol,Any}(
+        :ratname=>rat,
+        :sessiondate=>String.(sessiondates),
+        :task=>String.(task),
+        :choices=>Int.(vcat(choices...)),
+        :rewards=>Int.(vcat(rewards...)),
+        :nleftclicks=>Int.(vcat(nleftclicks...)),
+        :nrightclicks=>Int.(vcat(nrightclicks...)),
+        :leftprobs=>zeros(length(vcat(choices...))),
+        :rightprobs=>zeros(length(vcat(choices...))),
+        :new_sess=>Bool.(vcat(new_sess...)),
+    )
+    D[:ntrials] = length(D[:new_sess])
     return PClicksData(D)
 end

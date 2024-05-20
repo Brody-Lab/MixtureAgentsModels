@@ -1,6 +1,6 @@
 module MixtureAgentsModels
 
-using MAT, Distributions, Distributed, Optim, ForwardDiff, Parameters, UnPack, CSV
+using MAT, CSV, NPZ, Distributions, Distributed, Optim, ForwardDiff, Parameters, UnPack
 using DataFrames, Plots, StatsPlots, Statistics, StatsBase, Measures, NaNStatistics
 using Flatten, LineSearches, LinearAlgebra, SparseArrays, SuiteSparse, SparseDiffTools, SparsityDetection
 using FiniteDiff, LogExpFunctions, CategoricalArrays, Plots, Distances, Random, InvertedIndices
@@ -14,6 +14,7 @@ export MBreward, MBchoice, MFreward, MFchoice
 export MBrewardB, MBchoiceB, MFrewardB, MFchoiceB
 export MBbellman, TD1, TD0, MBbellmanB, TD1B
 export TransReward, CR, CO, UR, UO
+export Choice,Reward
 export Persev, NoveltyPref, Bias, Gambler
 export DeltaClicks, DeltaClicksZ, Intercept
 # agent functions
@@ -75,6 +76,8 @@ include("tasks/pclicks_task.jl")
 
 include("agents/NoveltyPref.jl")
 include("agents/Bias.jl")
+include("agents/Choice.jl")
+include("agents/Reward.jl")
 include("agents/Intercept.jl")
 include("agents/Persev.jl")
 include("agents/Gambler.jl")

@@ -1,8 +1,7 @@
 function ratdata_tasks(task::Union{AbstractString,Nothing}=nothing)
-    tasks = Dict(
-        "TwoStepData"=>TwoStepData,"twostepdata"=>TwoStepData,
-        "PClicksData"=>PClicksData,
-        "GenericData"=>GenericData)
+    task_types = subtypes(RatData)
+    task_strings = string.(task_types)
+    tasks = Dict([ts=>tt for (ts,tt) in zip(task_strings,task_types)])
     if !isnothing(task)
         return tasks[task]
     else

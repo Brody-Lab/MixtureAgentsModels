@@ -10,9 +10,11 @@ using MixtureAgentsModels
 # - `Bias` (2X the same as Intercept, equivalent to definition used in MoA-HMM manuscript)
 # - `MFreward` and `MFrewardB` 
 # - `MFchoice` and `MFchoiceB`
-# - `TD1` and `TD1B` (equivalent to the above)
+# - `TD1` and `TD1B` (equivalent to `MFchoice` and `MFchoiceB`)
 # - `Gambler`
 # - `Persev`
+# - `Reward`
+# - `Choice`
 # Agents with a second version (e.g. `MFrewardB`) differ by what the learning rate is acting on, leading to differences in value scaling, but are functionally equivalent.
 # Explicitly, all 'B' versions only use the learning rate to decay previous values, and the learning rate on reward is absorbed into the agent weight to reduce interactions between the two parameters.
 

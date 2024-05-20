@@ -439,6 +439,12 @@ function plot_behavior_cpd!(df_devs,type = "state_time",side=nothing,shift=0,c=[
 end
 
 function plot_state_coefs(df_devs)
+    nice_blue = RGB(65/255,105/255,225/255)
+    nice_red = RGB(178/255,34/255,34/255)
+
+    nice_blue_d = RGB(5/255,45/255,165/255)
+    nice_red_d = RGB(138/255,0/255,0/255)
+
     zl = repeat([["z1" "z1"]; ["z2" "z2"]],1,1,20)
     zl2 = repeat([["2-z1" "2-z1"]; ["1-z2" "1-z2"]],1,1,20)
 
@@ -461,11 +467,11 @@ function plot_state_coefs(df_devs)
     )
 
     df_avg = combine(groupby(df,[:r,:z]),:coef=>median,:coef=>bootci)
-    p = @df groupby(df,:r)[1] violin(:z,:coef,group=:z,framestyle=:box,side=:left,msw=0,c=:gray,alpha=0.5,label="")
+    p = @df groupby(df,:r)[1] violin(:z,:coef,group=:z,framestyle=:box,side=:left,msw=0,c=nice_red,alpha=0.5,label="")
     print(groupby(df,:r)[1])
-    @df groupby(df,:r)[2] violin!(:z,:coef,group=:z,framestyle=:box,side=:right,msw=0,c=:gold3,alpha=0.5,label="")
-    @df groupby(df,:r)[1] dotplot!(:z,:coef,group=:z,framestyle=:box,side=:left,msw=0,c=:gray,label="")
-    @df groupby(df,:r)[2] dotplot!(:z,:coef,group=:z,framestyle=:box,side=:right,msw=0,c=:gold3,label="")
+    @df groupby(df,:r)[2] violin!(:z,:coef,group=:z,framestyle=:box,side=:right,msw=0,c=nice_blue,alpha=0.5,label="")
+    @df groupby(df,:r)[1] dotplot!(:z,:coef,group=:z,framestyle=:box,side=:left,msw=0,c=nice_red_d,label="")
+    @df groupby(df,:r)[2] dotplot!(:z,:coef,group=:z,framestyle=:box,side=:right,msw=0,c=nice_blue_d,label="")
     @df groupby(df_avg,:r)[1] scatter!([0.5,1.5] .- 0.15,:coef_median,yerror=:coef_bootci,color=:black,fc=:gray33,markersize=7,lw=3,label="")
     @df groupby(df_avg,:r)[2] scatter!([0.5,1.5] .+ 0.15,:coef_median,yerror=:coef_bootci,color=:black,fc=:gray33,markersize=7,lw=3,label="")
 
@@ -502,8 +508,14 @@ function plot_state_rectangles!(p,z,z_1h,inds,height)
     end
 end
 
-function plot_behavior_regs(df_trial,lmm,ex_sess=108,type="time",cs=[1 2])
+function plot_behavior_regs(df_trial,lmm,ex_sess=108,type="time",cs=[1 2 3])
     forms,_ = behavior_forms()
+    nice_blue = RGB(65/255,105/255,225/255)
+    nice_red = RGB(178/255,34/255,34/255)
+
+    nice_blue_d = RGB(5/255,45/255,165/255)
+    nice_red_d = RGB(138/255,0/255,0/255)
+
     if type == "time"
         form_set = 4
         t_type = :t
@@ -557,13 +569,13 @@ function plot_behavior_regs(df_trial,lmm,ex_sess=108,type="time",cs=[1 2])
             p1 = plot()
             plot_state_rectangles!(p1,df_ex.z_ind,onehot(df_ex.z_ind),df_ex[!,time_type],maximum(dur))
 
-            scatter!(df_ex[!,time_type][i1],dur[i1],c=:gold3,msw=0)#,yflip=true)
+            scatter!(df_ex[!,time_type][i1],dur[i1],c=nice_blue,msw=0)#,yflip=true)
             # yticks!(0:1:3,[L"$10^0$",L"$10^1$",L"$10^2$",L"$10^3$"])
-            scatter!(df_ex[!,time_type][i2],dur[i2],c=:gray,msw=0)
+            scatter!(df_ex[!,time_type][i2],dur[i2],c=nice_red,msw=0)
             # plot!(df_ex[!,time_type][i1],predict(lmm)[i1],lw=4,c=:black,s=:dash,label="full")
             # plot!(df_ex[!,time_type][i2],predict(lmm)[i2],lw=4,c=:gold4,label="full")
-            plot!(df_ex[!,time_type][i1],df_ex[!,vpred][i1],lw=4,c=:gold4,s=:dash,label="full")
-            plot!(df_ex[!,time_type][i2],df_ex[!,vpred][i2],lw=4,c=:black,label="full")
+            plot!(df_ex[!,time_type][i1],df_ex[!,vpred][i1],lw=4,c=nice_blue_d,s=:dash,label="full") #s=:dash
+            plot!(df_ex[!,time_type][i2],df_ex[!,vpred][i2],lw=4,c=nice_red_d,label="full")
 
             plot!(xformatter=_->"")
             plot!(legend=false)
@@ -571,10 +583,10 @@ function plot_behavior_regs(df_trial,lmm,ex_sess=108,type="time",cs=[1 2])
             # hline!([coef(lmm)[1] .+ coef(lmm)[7]],c=:black,s=:dash,label="")
 
 
-            p2 = plot(df_ex[!,time_type],t_pred,lw=4,c=cs[1],label="time")#,yflip=true)
-            plot!(df_ex[!,time_type],t_pred_rew,lw=4,c=cs[1],s=:dash,label="time")#,yflip=true)
-            plot!(df_ex[!,time_type],s_pred,lw=4,c=cs[2],label="state")#,yflip=true)
-            plot!(df_ex[!,time_type],s_pred_rew,lw=4,c=cs[2],s=:dash,label="state")#,yflip=true)
+            p2 = plot(df_ex[!,time_type],t_pred,lw=4,c=:black,label="time")#,yflip=true)
+            plot!(df_ex[!,time_type],t_pred_rew,lw=4,c=:black,s=:dash,label="time")#,yflip=true)
+            plot!(df_ex[!,time_type],s_pred,lw=4,c=cs[3],label="state")#,yflip=true)
+            plot!(df_ex[!,time_type],s_pred_rew,lw=4,c=cs[3],s=:dash,label="state")#,yflip=true)
             # hline!([coef(lmm)[1]],c=:gold3,label="")
             # hline!([coef(lmm)[1] .+ coef(lmm)[7]],c=:black,s=:dash,label="")
             plot!(legend=false)
@@ -694,4 +706,12 @@ ylabel!("")
 plot!(xtickfontsize=12,ytickfontsize=12)
 savefig("/Users/sarah/Library/CloudStorage/Dropbox/Princeton/Manuscripts/MoA-HMM/figures/fig6_behavior_state_cors.svg")
 
+l = @layout [a b{0.33w}]
+plot(p1,p3,layout=l,size=(900,500))
+title!("")
+xlabel!("")
+ylabel!("")
+# plot!(size=(800,800))
+plot!(xtickfontsize=12,ytickfontsize=12)
+savefig("/Users/sarah/Library/CloudStorage/Dropbox/Princeton/Presentations/FPO/behavior_state_cors.svg")
 

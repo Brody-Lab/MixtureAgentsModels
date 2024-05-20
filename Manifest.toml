@@ -2,7 +2,7 @@
 
 julia_version = "1.10.0"
 manifest_format = "2.0"
-project_hash = "41a214d8a5070616981d3aa65b69b4bf7c1616a5"
+project_hash = "df0e4e2755e6bc0d8d8abd48fe1cf4ddd695447c"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "f5c25e8a5b29b5e941b7408bc8cc79fea4d9ef9a"
@@ -1272,6 +1272,12 @@ git-tree-sha1 = "9b1f15a08f9d00cdb2761dcfa6f453f5d0d6f973"
 uuid = "079eb43e-fd8e-5478-9966-2cf3e3edb778"
 version = "2.7.1+0"
 
+[[deps.NPZ]]
+deps = ["FileIO", "ZipFile"]
+git-tree-sha1 = "60a8e272fe0c5079363b28b0953831e2dd7b7e6f"
+uuid = "15e1cf62-19b3-5cfa-8e77-841668bca605"
+version = "0.4.3"
+
 [[deps.NaNMath]]
 deps = ["OpenLibm_jll"]
 git-tree-sha1 = "0877504529a3e5c3343c6f8b4c0381e57e4387e4"
@@ -2204,6 +2210,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "e92a1a012a10506618f10b7047e478403a046c77"
 uuid = "c5fb5394-a638-5e4d-96e5-b29de1b5cf10"
 version = "1.5.0+0"
+
+[[deps.ZipFile]]
+deps = ["Libdl", "Printf", "Zlib_jll"]
+git-tree-sha1 = "f492b7fe1698e623024e873244f10d89c95c340a"
+uuid = "a5390f91-8eb1-5f08-bee0-b1d1ffed6cea"
+version = "0.10.1"
 
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
