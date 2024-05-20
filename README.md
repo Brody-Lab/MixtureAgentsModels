@@ -31,7 +31,7 @@ or, without using the package manager:
 julia > using Pkg
 julia > Pkg.instantiate()
 ```
-This will only install the package within the project folder, so to use the package via `using MixtureAgentsModels`, you must first start julia by specifying the project folder as shown above. Updating the github repository via `git pull` will update the package.
+This will only install the package within the project folder, so to use the package via `using MixtureAgentsModels`, you must first start julia by specifying the project folder as shown above. If you cloned the repository, using the command `git pull` will update the package.
 
 ### Option 2: Install as global package
 To install the package globally, start julia and enter the package manager by pressing `]`. To install, enter the following command:
