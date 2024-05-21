@@ -55,6 +55,8 @@ function PClicksData(data::D) where D <: Union{Dict,JSON3.Object}
     if "type" in keys(data)
         delete!(data,"type")
     end
+    data[:sessiondate] = string.(data[:sessiondate])
+    data[:task] = string.(data[:task])
     return PClicksData(; data...)
 end
 
