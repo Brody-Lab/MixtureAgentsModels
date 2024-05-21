@@ -3,8 +3,8 @@ function plot_model(model::ModelHMM,agents::AbstractArray{A},options::AgentOptio
         sort_model!(model; sort_args...)
     end
 
-    if any(typeof.(agents) .<: TransReward)
-        nottr = (!).(typeof.(agents) .<: TransReward)
+    if any(typeof.(agents) .<: TransReward) | any(typeof.(agents) .<: Choice) | any(typeof.(agents) .<: Reward)
+        nottr = (!).((typeof.(agents) .<: TransReward) .| (typeof.(agents) .<: Choice) .| (typeof.(agents) .<: Reward))
         βplot,_ = plot_tr(model,agents)
     else
         nottr = 0
@@ -22,9 +22,9 @@ function plot_model(model::ModelHMM,agents::AbstractArray{A},options::AgentOptio
         αplot = plot_params(agents,options)
     else 
         if sum(nottr) > 1
-            αplot = plot_β(model.β[nottr,:],agents[nottr,1])
+            αplot = plot_β(model.β[nottr,:],agents[nottr,1];ylim=(min(model.β...),max(model.β...)))
         elseif sum(nottr) == 1
-            αplot = plot_β(reshape(model.β[nottr,:],1,:),agents[nottr,1])
+            αplot = plot_β(reshape(model.β[nottr,:],1,:),agents[nottr,1];ylim=(min(model.β...),max(model.β...)))
         else
             αplot = nothing
         end
@@ -126,7 +126,7 @@ function plot_β(model::ModelHMM,agents)
     return plot_β(model.β,agents)
 end
 
-function plot_β(β::AbstractMatrix,agents)
+function plot_β(β::AbstractMatrix,agents;ylim=nothing)
     ns = size(β,2)
     na = size(β,1)
 
@@ -136,21 +136,27 @@ function plot_β(β::AbstractMatrix,agents)
     if ns == 1
         βplot = @df data bar(:agent, :beta, color=:gray53, bar_width=1)
         xticks!(βplot,1:na,atick.(agents[:,1]))
-
+        if !isnothing(ylim)
+            ylims!(βplot,ylim)
+        end
     else
         βplot = @df data groupedbar(:state, :beta, group=:agent, c=repeat(collect(1:ns)',na)[:], legend=false)
-
+        if !isnothing(ylim)
+            ylims!(βplot,ylim)
+        end
         s = rollmean(collect(range(-0.4,0.4,na+1)),2)
         xt = collect(1:ns) .+ repeat(s,1,ns)'
         xl = permutedims(repeat(atick.(agents[:,1]),1,ns))
         xticks!(xt[:],xl[:])
+        plot!([xt[1]-0.25,xt[end]+0.25],[0,0],color=:black,label=nothing,lw=2)
     end
 
     # xticks!(βplot,1:na,atick.(agents[:,1]))
     # plot!(legend=false)
-    title!(βplot,"model weights")
-    ylabel!(βplot,"weight")
-    xlabel!(βplot,"agent")
+    plot!(xrotation=45)
+    title!(βplot,"agent weights")
+    # ylabel!(βplot,"weight")
+    # xlabel!(βplot,"agent")
 
     return βplot
 end
@@ -310,32 +316,44 @@ end
 function plot_tr(model,agents;err=nothing)
     ns = length(model.π)
     p =  Array{Any}(undef,ns)
-    TR_types = [CR,UR,CO,UO]
-    for(i,type) in enumerate(TR_types)
+    TR_types = [CR,UR,CO,UO,Reward,Choice]
+    i = 1
+    ys = (min(model.β...),max(model.β...))
+
+    for type in TR_types
         TR = typeof.(agents) .<: type
+        if sum(TR) == 0
+            continue
+        end
         TR_agents = agents[TR]
         nback = get_param.(TR_agents,:nback)
         TR_β = model.β[TR,:]
-        for z = 1:ns
-            if i==1
-                if isnothing(err)
-                    p[z] = plot(nback,TR_β[:,z],label=type,color=TR_agents[1].color,lw=2,linestyle=TR_agents[1].line_style,title=string(z))
-                else
-                    p[z] = plot(nback,TR_β[:,z],label=type,color=TR_agents[1].color,lw=2,linestyle=TR_agents[1].line_style,title=string(z),ribbon=err[TR],fillalpha=0.2)
-                end
-            else
-                if isnothing(err)
-                    plot!(p[z],nback,TR_β[:,z],label=type,color=TR_agents[1].color,lw=2,linestyle=TR_agents[1].line_style,title=string(z))
-                else
-                    plot!(p[z],nback,TR_β[:,z],label=type,color=TR_agents[1].color,lw=2,linestyle=TR_agents[1].line_style,title=string(z),ribbon=err[TR],fillalpha=0.2)
-                end
 
+        for z = 1:ns
+            if i == 1
+                p[z] = plot(nback,zeros(size(nback)),color=:black,label=nothing,lw=2)
             end
+            # if i==1
+            #     if isnothing(err)
+            #         p[z] = plot(nback,TR_β[:,z],label=type,color=TR_agents[1].color,lw=2,linestyle=TR_agents[1].line_style,title=string(z))
+            #     else
+            #         p[z] = plot(nback,TR_β[:,z],label=type,color=TR_agents[1].color,lw=2,linestyle=TR_agents[1].line_style,title=string(z),ribbon=err[TR],fillalpha=0.2)
+            #     end
+            # else
+            if isnothing(err)
+                plot!(p[z],nback,TR_β[:,z],label=type,color=TR_agents[1].color,lw=2,linestyle=TR_agents[1].line_style,title=string(z),ylims=ys)
+            else
+                plot!(p[z],nback,TR_β[:,z],label=type,color=TR_agents[1].color,lw=2,linestyle=TR_agents[1].line_style,title=string(z),ribbon=err[TR],fillalpha=0.2,ylims=ys)
+            end
+
+            # end
         end
+        i += 1
     end
     l = @layout [grid(1,length(p))]
     return plot(p...,layout=l,xlabel="nback"),p
 end
+
 
 function compare_tr(model1,model2,agents)
     ns = length(model1.π)

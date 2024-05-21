@@ -50,7 +50,7 @@ function next_Q!(Q::AbstractArray{Float64},θ::A,data::D,t::Int) where {A <: Rew
     Q .= 0.
     if tn > 0
         if !any(new_sess[tn+2:t])
-            Q[choices[tn]] = Float64(rewards[tn]==1)
+            Q[choices[tn]] = rewards[tn]
         end
     end
 end
@@ -64,7 +64,10 @@ function βtitle(θ::Reward)
     @unpack nback = θ
     return string("β(Reward[t-",nback,"])")
 end
-
+function atick(θ::Reward)
+    @unpack nback = θ
+    return string("Reward[t-",nback,"]")
+end
 """
     agent2string(θ)
 
@@ -72,5 +75,5 @@ Gets string corresponding to agent
 """
 function agent2string(θ::Reward)
     @unpack nback = θ
-    return string("Reward",nback)
+    return string("R",nback)
 end

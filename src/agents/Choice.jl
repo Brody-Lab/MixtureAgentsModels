@@ -14,7 +14,7 @@ Fields:
     Q0::Q = @SVector [0.5,0.5,0,0]
     nback::I = 1; @assert nback > 0
     βprior::B = [Normal(0,10)]
-    color::C = :royalblue
+    color::C = :firebrick
     color_lite::C = :salmon
     line_style::S = :solid
 end
@@ -64,6 +64,10 @@ function βtitle(θ::Choice)
     @unpack nback = θ
     return string("β(Choice[t-",nback,"])")
 end
+function atick(θ::Choice)
+    @unpack nback = θ
+    return string("Choice[t-",nback,"]")
+end
 
 """
     agent2string(θ)
@@ -72,5 +76,5 @@ Gets string corresponding to agent
 """
 function agent2string(θ::Choice)
     @unpack nback = θ
-    return string("Choice",nback)
+    return string("C",nback)
 end

@@ -244,6 +244,12 @@ function string2agents(agents_str::AbstractArray{T}) where T <: Any
         if any(contains.(str,[r"CR\d",r"UR\d",r"CO\d",r"UO\d"]))
             nback = parse(Int,str[3:end])
             agents[a] = agent_strings(str[1:2])(nback)
+        elseif any(contains.(str,[r"R\d"]))
+            nback = parse(Int,str[2:end])
+            agents[a] = Reward(nback)
+        elseif any(contains.(str,[r"C\d"]))
+            nback = parse(Int,str[2:end])
+            agents[a] = Choice(nback)
         else
             agents[a] = agent_strings(str)()
         end

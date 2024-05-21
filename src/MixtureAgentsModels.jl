@@ -1,6 +1,7 @@
 module MixtureAgentsModels
 
-using MAT, CSV, NPZ, Distributions, Distributed, Optim, ForwardDiff, Parameters, UnPack
+using MAT, CSV, NPZ, InteractiveUtils
+using Distributions, Distributed, Optim, ForwardDiff, Parameters, UnPack
 using DataFrames, Plots, StatsPlots, Statistics, StatsBase, Measures, NaNStatistics
 using Flatten, LineSearches, LinearAlgebra, SparseArrays, SuiteSparse, SparseDiffTools, SparsityDetection
 using FiniteDiff, LogExpFunctions, CategoricalArrays, Plots, Distances, Random, InvertedIndices

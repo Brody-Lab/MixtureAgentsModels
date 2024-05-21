@@ -36,8 +36,8 @@ Data struct for Poisson Clicks task in rats. Also includes fields for 2-armed ba
     rightprobs::VF
     nleftclicks::VI
     nrightclicks::VI
-    zleftclicks::VF = (nleftclicks .- mean(vcat(nleftclicks,nrightclicks))) ./ std(nrightclicks .- nleftclicks)
-    zrightclicks::VF = (nrightclicks .- mean(vcat(nleftclicks,nrightclicks))) ./ std(nrightclicks .- nleftclicks)
+    zleftclicks::VF = nleftclicks ./ std(nrightclicks .- nleftclicks) # (nleftclicks .- mean(vcat(nleftclicks,nrightclicks))) ./ std(nrightclicks .- nleftclicks)
+    zrightclicks::VF = nrightclicks ./ std(nrightclicks .- nleftclicks) # (nrightclicks .- mean(vcat(nleftclicks,nrightclicks))) ./ std(nrightclicks .- nleftclicks)
     new_sess::VB
     new_sess_free::VB = new_sess
     forced::VB = falses(ntrials)
@@ -193,18 +193,20 @@ function load_pclicks_npz(file::String,rat::String;sessions::Any=nothing,folder=
     for (f,file) in enumerate(files) 
         dat = npzread(file)
         choices[f] = dat["choices"]
-        clicks = dropdims(sum(dat["clicks"];dims=2),dims=2)
-        nleftclicks[f] = clicks[:,1]
-        nrightclicks[f] = clicks[:,2]
-        rewards[f] = dropdims(diff(clicks,dims=2) .> 0,dims=2) .== dat["choices"]
+        clicks = dropdims(sum(dat["clicks"] .> 0;dims=2),dims=2)
+        nleftclicks[f] = clicks[:,2]
+        nrightclicks[f] = clicks[:,1]
+        rewards[f] = dropdims(diff(clicks,dims=2) .< 0,dims=2) .== dat["choices"]
         new_sess[f] = vcat(true,falses(length(rewards[f])-1))
     end
+    rewards = Int.(vcat(rewards...))
+    rewards[rewards .== 0] .= -1
     D = Dict{Symbol,Any}(
         :ratname=>rat,
         :sessiondate=>String.(sessiondates),
         :task=>String.(task),
-        :choices=>Int.(vcat(choices...)),
-        :rewards=>Int.(vcat(rewards...)),
+        :choices=>Int.(vcat(choices...)) .+ 1,
+        :rewards=>rewards,
         :nleftclicks=>Int.(vcat(nleftclicks...)),
         :nrightclicks=>Int.(vcat(nrightclicks...)),
         :leftprobs=>zeros(length(vcat(choices...))),
