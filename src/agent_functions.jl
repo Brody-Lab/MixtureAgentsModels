@@ -42,12 +42,12 @@ end
 
 Initializes value difference matrix `x` and populates agent values for `agents` using `data`.
 """
-function initialize_x(data::D,agents::Array{A}) where {A <: Agent, D <: RatData}
+function initialize_x(data::D,agents::Array{A};scale_x::Bool=false) where {A <: Agent, D <: RatData}
     @unpack nfree = data
     na = length(agents)
     x = Array{Float64}(undef,na,nfree)
     for a = 1:na
-        x[a,:] = update!(x[a,:],agents[a],data)
+        x[a,:] = update!(x[a,:],agents[a],data;scale_x=scale_x)
     end
     return x
 end
@@ -69,8 +69,8 @@ end
 
 Initializes value difference matrix `x` and choice vector `y` using `data`
 """
-function initialize(data::D,agents::Array{A}) where {A <: Agent, D <: RatData}
-    return initialize_y(data),initialize_x(data,agents)
+function initialize(data::D,agents::Array{A};scale_x::Bool=false) where {A <: Agent, D <: RatData}
+    return initialize_y(data),initialize_x(data,agents;scale_x=scale_x)
 end
 
 """
@@ -90,12 +90,12 @@ function initialize(options::AgentOptions)
 end
 
 """
-    initialize(agent::A) where {A <: Agent}
+    initialize(agent::A; kwargs...) where {A <: Agent}
 
-Initializes `agent`, setting all parameters to default values.
+Initializes `agent`, setting any parameters specified by keyword arguments in `kwargs`.
 """
-function initialize(agent::A) where {A<:Agent}
-    return A()
+function initialize(agent::A;kwargs...) where {A<:Agent}
+    return A(;kwargs...)
 end
 
 """
@@ -139,11 +139,11 @@ Populates value difference matrix `x` and updates agent vector `agents` with new
 Uses available threads to compute in parallel across agents.
 """
 function update!(x::T1,agents::Array{A},vals::T2,options::AgentOptions,data::D) where {A <: Agent, T1 <: AbstractArray, T2 <: AbstractArray, D <: RatData}
-    @unpack fit_params,fit_symbs,param_inds,fit_inds = options
+    @unpack fit_params,fit_symbs,param_inds,fit_inds,scale_x = options
     if !isnothing(fit_params)
         Threads.@threads for a in fit_inds
             i = fit_params[param_inds .== a]
-            x[a,:],agents[a] = update(x[a,:],agents[a],vals[i],fit_symbs[i],data)
+            x[a,:],agents[a] = update(x[a,:],agents[a],vals[i],fit_symbs[i],data;scale_x=scale_x)
         end
     end
 end
@@ -153,9 +153,9 @@ end
 
 Update `agent` parameters specified by `symbs` with new values `vals` and repopulated value difference matrix `x`
 """
-function update(x::T1,agent::A,vals::Union{T2,AbstractArray{T2}},symbs::Union{Symbol,AbstractArray{Symbol}},data::D) where {A <: Agent, T1 <: AbstractArray, T2 <: Real, D <: RatData}
+function update(x::T1,agent::A,vals::Union{T2,AbstractArray{T2}},symbs::Union{Symbol,AbstractArray{Symbol}},data::D;scale_x::Bool=false) where {A <: Agent, T1 <: AbstractArray, T2 <: Real, D <: RatData}
     agent = update(agent,symbs,vals)
-    update!(x,agent,data)
+    update!(x,agent,data;scale_x=scale_x)
     return x,agent
 end
 
@@ -165,7 +165,7 @@ end
 Populate value difference vector `x` for `agent` using `data`. Works on mutable variable `x`, but also returns `x` if input is immutable (e.g. when the passed `x` is an indexed subset of full value matrix). The value difference is computed as `Q[1] - Q[2]`, where the first index corresponds to the primary choice and the second index corresponds to the alternative choice.
 Uses available threads to compute in parallel across sessions.
 """
-function update!(x::Array{T},agent::A,data::D) where {A <: Agent, T <: Union{Float64,ForwardDiff.Dual}, D <: RatData}
+function update!(x::Array{T},agent::A,data::D;scale_x::Bool=false) where {A <: Agent, T <: Union{Float64,ForwardDiff.Dual}, D <: RatData}
     @unpack ntrials,new_sess,new_sess_free,sess_inds,forced = data
     Threads.@threads for (inds,tf) in collect(zip(sess_inds,findall(new_sess_free))) #eachindex(sess_inds) #nds in sess_inds
         Q = SizedVector{4}(init_Q(agent,T))
@@ -180,7 +180,28 @@ function update!(x::Array{T},agent::A,data::D) where {A <: Agent, T <: Union{Flo
             next_Q!(Q,agent,data,t)
         end
     end
+    if scale_x
+        x .= zscore(x,agent)
+    end
     return x
+end
+
+"""
+    zscore(x,agent::A) where A <: Union{Bias,Intercept}
+
+Dispatch for Bias and Intercept agents, which do not require standardization.
+"""
+function zscore(x,agent::A) where A <: Union{Bias,Intercept}
+    return x
+end
+
+"""
+    zscore(x,agent::A) where A <: Agent
+
+Standardizes `x` using only standard deviation of `x` for `agent`. Assumes the mean is 0 for all agents, since `x` is a value difference.
+"""
+function zscore(x,agent::A) where A <: Agent
+    return x ./ std(x)
 end
 
 """

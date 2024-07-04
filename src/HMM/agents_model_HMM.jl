@@ -27,7 +27,7 @@ See `examples/example_fit_HMM.jl` for example implementation
 """
 function optimize(data::RatData,model_options::ModelOptionsHMM,agent_options::AgentOptions;data_test::Union{RatData,Nothing}=nothing,verbose::Bool=true,disp_iter::Int=1,init_hypers::Bool=true,init_beta::Bool=true,seed::Int=0,save_model::Bool=false,save_path=nothing,fname=nothing,overwrite=false,save_iter::Bool=false,fit_num=nothing)::Tuple{ModelHMM,Array{Agent},Vararg{Float64}} 
     @unpack maxiter,tol,nstarts = model_options
-    @unpack fit_params = agent_options
+    @unpack fit_params,scale_x = agent_options
 
     # if saving, create directory, check if file already exists
     if save_model
@@ -95,7 +95,7 @@ function optimize(data::RatData,model_options::ModelOptionsHMM,agent_options::Ag
             model_i = initialize(model_options,agents_i)
         end
 
-        x = initialize_x(data,agents_i)
+        x = initialize_x(data,agents_i;scale_x=scale_x)
 
         iter = 1
         dll = 1.
@@ -109,6 +109,9 @@ function optimize(data::RatData,model_options::ModelOptionsHMM,agent_options::Ag
         lls_test = Array{Float64}(undef,2)
         while iter <= maxiter && (dll > tol || dll < 0) && (wdiff > tol || pdiff > tol) && !isnan(dll) && neg_counter < 11 #(wdiff > tol || pdiff > tol) &&
             if verbose && ((iter % disp_iter == 0) || (iter == 1))
+                if iter > 1
+                    print("\r"*repeat("\e[F\r",5))
+                end
                 str = string("start = ",start_i,"; iteration ", iter, " of ", maxiter)
                 println(str)
                 model_fit, agents_fit, lls[2], lls_test[2] = @time optimize(model_i,agents_i,y,x,data,model_options,agent_options,data_test)
@@ -135,6 +138,7 @@ function optimize(data::RatData,model_options::ModelOptionsHMM,agent_options::Ag
                     # "\n  ll_test = ",round(lls_test[2],digits=5),"; dll_test = ",round(dll_test,digits=5)
                     )
                 println(str)
+                flush(stdout)
             end
             iter += 1
             # check for overfitting if using a test set, or decreasing quality of train fit

@@ -12,8 +12,9 @@ Options indicating agents and agent parameters that need to get fit. See constru
 - `fit_inds`: (nfit_agents x 1) Vector specify which agents are fit. Calculated automatically from constructor function
 - `fit_scales`: (nparams x 1) Vector of symbols for scaling parameters of each fit parameter. Calculated automatically from constructor function.
 - `fit_priors`: (nparams x 1) Vector of symbols for scaling parameters of each fit parameter. Caluclated in constructor function if `fit_priors=true`
+- `scale_x`: (Bool) Whether to scale (by zscoring) the value difference matrix `x`. Defaults to `false`
 """
-@with_kw struct AgentOptions{A<:Agent,VS<:Union{Vector{Symbol},Nothing},VI<:Union{Vector{Int},Nothing},VP<:Union{Vector{Symbol},Nothing}} 
+@with_kw struct AgentOptions{A<:Agent,VS<:Union{Vector{Symbol},Nothing},VI<:Union{Vector{Int},Nothing},VP<:Union{Vector{Symbol},Nothing},B<:Bool} 
     agents::Array{A}
     fit_symbs::VS = nothing
     symb_inds::VI = nothing
@@ -22,13 +23,13 @@ Options indicating agents and agent parameters that need to get fit. See constru
     fit_inds::VI = nothing
     fit_scales::VS = nothing
     fit_priors::VP = nothing
+    scale_x::B = false
 end
 
 
 """
-    AgentOptions(agents)
-    AgentOptions(agents,fit_symbs,fit_params)
-    AgentOptions(agents,fit_symbs,fit_params;fit_priors=fit_priors)
+    AgentOptions(agents;scale_x=false)
+    AgentOptions(agents,fit_symbs,fit_params;fit_priors=false,scale_x=false)
 
 Constructor function to define `AgentOptions` struct. Converts inputs and caculates additional fields as needed.
 
@@ -39,6 +40,7 @@ Constructor function to define `AgentOptions` struct. Converts inputs and cacula
 
 # Optional Inputs:
 - `fit_priors`: (Bool) Whether to use priors for each fit parameter. Defaults to `false`
+- `scale_x`: (Bool) Whether to scale (by zscoring) the value difference matrix `x`. Defaults to `false`
 
 # Examples:
 ## Example 1: Separate parameters
@@ -92,7 +94,7 @@ No agent parameters to fit. Define options by passing only the agents, which wil
     
     julia> options = AgentOptions(agents)
 """
-function AgentOptions(agents::Array{A},fit_symbs::Vector{Symbol},fit_params::Vector{T};fit_priors::Bool=false) where {A <: Agent, T <: Any}
+function AgentOptions(agents::Array{A},fit_symbs::Vector{Symbol},fit_params::Vector{T};fit_priors::Bool=false,scale_x::Bool=false) where {A <: Agent, T <: Any}
     # AgentOptions constructor for flattening `fit_params` when an agent has multiple parameters to fit
     fit_params_f = reduce(vcat,fit_params) # flattened fit_params
     fit_params_r = copy(fit_params) # copy of original fit_params in case of repeat manipulation
@@ -117,30 +119,38 @@ function AgentOptions(agents::Array{A},fit_symbs::Vector{Symbol},fit_params::Vec
         fit_params_r = repeat(fit_params_r,ns)
     end
     param_inds = get_param_inds(fit_params_r) #reduce(vcat,[fill(i,axes(fit_params_r[i])) for i in eachindex(fit_params_r)]) # agent indices for fit_params
-    return AgentOptions(agents,fit_symbs_r,fit_params_f,param_inds,fit_scales_r,fit_priors_r)
+    return AgentOptions(agents,fit_symbs_r,fit_params_f,param_inds,fit_scales_r,fit_priors_r,scale_x)
 end
 
-function AgentOptions(agents::Array{A},fit_symbs::Symbol,fit_params::String;fit_priors::Bool=false) where {A <: Agent}
-    return AgentOptions(agents)
+function AgentOptions(agents::Array{A},fit_symbs::Symbol,fit_params::String;kwargs...) where {A <: Agent}
+    # catch constructor for `dict2agents` conversion function when `fit_params` gets read as a string = "nothing"
+    return AgentOptions(agents;kwargs...)
 end
 
-function AgentOptions(agents::Array{A},fit_symbs::Vector{Symbol},fit_params::Vector{Int64},param_inds::Vector{Int64},fit_scales::Vector{Symbol},fit_priors::Union{Vector{Symbol},Nothing}) where {A <: Agent}   
-    # AgentOptions constructor function to add `fit_inds` and `symb_inds` fields
+function AgentOptions(agents::Array{A},fit_symbs::Vector{Symbol},fit_params::Vector{Int64},param_inds::Vector{Int64},fit_scales::Vector{Symbol},fit_priors::Union{Vector{Symbol},Nothing},scale_x::Bool) where {A <: Agent}   
+    # AgentOptions constructor function to add `fit_inds` and `symb_inds` fields, separated out for calls from `agent_comparison`.
     symb_inds = [param_inds[findfirst(fit_params .== a)] for a in unique(fit_params[fit_params .> 0])]
     deleteat!(param_inds,fit_params .== 0)
     deleteat!(fit_params,fit_params .== 0)
     fit_inds = unique(param_inds)
-    return AgentOptions(agents=agents,fit_symbs=fit_symbs,symb_inds=symb_inds,fit_params=fit_params,param_inds=param_inds,fit_inds=fit_inds,fit_scales=fit_scales,fit_priors=fit_priors)
+    return AgentOptions(agents=agents,fit_symbs=fit_symbs,symb_inds=symb_inds,fit_params=fit_params,param_inds=param_inds,fit_inds=fit_inds,fit_scales=fit_scales,fit_priors=fit_priors,scale_x=scale_x)
 end
 
-function AgentOptions(agents::Array{A}) where A <: Agent
+function AgentOptions(agents::Array{A};scale_x::Bool=false) where A <: Agent
     # AgentOptions constructor when no agent parameters are being fit
-    return AgentOptions(agents=agents)
+    return AgentOptions(agents=agents,scale_x=scale_x)
 end
 
-function AgentOptions(agents::Array{A},options::AgentOptions,fit_priors::Bool=false) where A <: Agent
+function AgentOptions(agents::Array{A},options::AgentOptions;fit_priors::Union{Bool,Nothing}=nothing) where A <: Agent
     # AgentOptions constructor to create stuct from existing AgentOptions and new agents with reinitialized parameter values.
-    return AgentOptions(agents,options.fit_symbs,get_fit_params(options);fit_priors=fit_priors)
+    if isnothing(fit_priors) 
+        if !isnothing(options.fit_priors)
+            fit_priors = true
+        else
+            fit_priors = false
+        end
+    end
+    return AgentOptions(agents,options.fit_symbs,get_fit_params(options);fit_priors=fit_priors,scale_x=options.scale_x)
 end
 
 function get_param_inds(fit_params::Vector{T}) where T

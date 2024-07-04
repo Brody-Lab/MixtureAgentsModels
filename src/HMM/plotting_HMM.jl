@@ -148,7 +148,7 @@ function plot_β(β::AbstractMatrix,agents;ylim=nothing)
         xt = collect(1:ns) .+ repeat(s,1,ns)'
         xl = permutedims(repeat(atick.(agents[:,1]),1,ns))
         xticks!(xt[:],xl[:])
-        plot!([xt[1]-0.25,xt[end]+0.25],[0,0],color=:black,label=nothing,lw=2)
+        plot!([xt[1]-0.25,xt[end]+0.25],[0,0],color=:black,label=nothing,xlims=(xt[1]-0.25,xt[end]+0.25))
     end
 
     # xticks!(βplot,1:na,atick.(agents[:,1]))
